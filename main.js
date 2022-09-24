@@ -35,6 +35,41 @@ class Pixel{
     };
 }
 
+class CircleBuffer{
+
+    constructor(size){
+        this._array = new Array(size);
+        this.length = 0;
+        this.IndexError = {}
+    }
+
+    toString(){
+        return '[object CircularBuffer('+this._array.length+') length '+this.length+']';
+    }
+
+    get(i){
+        if (i<0 || i<this.length-this._array.length){
+            return undefined;
+        }
+        return this._array[i%this._array.length];
+    }
+
+    set(i,v){
+        if (i<0 || i<this.length-this._array.length){
+            throw CircularBuffer.IndexError;
+        }
+        while (i>this.length) {
+            this._array[this.length%this._array.length]= undefined;
+            this.length++;
+        }
+        this._array[i%this._array.length]= v;
+        if (i==this.length){
+            this.length++;
+        }
+    }
+
+}
+
 class Surface{
     constructor(){
         this.surface = new Map();
@@ -217,19 +252,22 @@ function vline(x,y1,y2, top, middle,bottom, sur){
     }
 }
 
+function render(surface){
+
+
+
+
+}
+
 
 function loop(ms){
     // clearScreen();
-    
+    render(surface)
     draw(surface);
     
-    for(let i =5; i < 40; i++) {
-        vline( i, 34,300,
-        new Pixel(6,2,11,255),
-        new Pixel(5,2,11,255),
-        new Pixel(5,2,11,255),
-        surface)
-    }
+
+    
+ 
     
    
 
