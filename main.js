@@ -70,6 +70,77 @@ class CircleBuffer{
 
 }
 
+class MapData{
+
+    constructor(path){
+        this._path = path;
+        this.verticies = [];
+        this.sectors = [];
+        this.state = 0; // 0 unloaded ; 1 loaded
+        this.loadMap(path);
+    }
+
+
+    async loadMap(path){
+        var state = -1;
+        (await fetch(path)).text().then( data=>{
+            this.rawData = data;
+            this.state = 1;
+            this.processMap()
+        })
+        
+    }
+
+    processMap(){
+        let lines = this.rawData.split("\n");
+        let verticies = [];
+        let sectors = [];
+        let playerStart = 0;
+        //check each line 
+        lines.forEach( line =>{
+            switch(line[0]){
+                case 'v':
+                    verticies.push(line.split("\t"));
+                    break;
+                case 's':
+                    sectors.push(line.split("\t"));
+                    break;
+                case 'p':
+                    playerStart = line.split("\t")
+            }
+            
+        })
+        //clean and grab the data
+        sectors.forEach( (sector, index) =>{          
+            sector.forEach( (data, i) =>{
+                if(i == 0) return;
+                sector[i] = data.split(" ").filter(x => x !== '');
+            })
+        })
+        verticies.forEach( (vertext, index) =>{          
+            vertext.forEach( (data, i) =>{
+                if(i == 0) return;
+                vertext[i] = data.split(" ").filter(x => x !== '');
+            })
+        })
+        //create the new vertex using the struct/class
+        for(let i = 0; i < verticies.length-1; i++){
+            this.verticies.push(new Vertex(verticies[i][1], verticies[i].slice(2)))
+        }
+
+        for(let i = 0; i < sectors.length-1; i++){
+            this.sectors.push(
+                sectors[i]
+
+            )
+        }
+        
+        
+
+        
+    }
+}
+
 class Surface{
     constructor(){
         this.surface = new Map();
@@ -79,8 +150,6 @@ class Surface{
                 this.surface.set(((y*W)+x), new Pixel(55,66,77,255))
             }
         }
-
-        
     }
 
     pixel(x,y){
@@ -92,18 +161,22 @@ class Surface{
 let surface = new Surface();
 
 class Sector{
-    constructor(){
+    constructor(floor, ceiling){
 
         this.floor;
-        this.ciel;
+        this.ceiling;
         this.xy = new xy(0,0);
-        this.neighbors;
+        this.neighbors = []
         this.npoints;
     }
 }
-let sectors = [];
 
-
+class Vertex{
+    constructor(y, x){
+        this.y = y;
+        this.x = x
+    }
+}
 
 class Player{
     constructor(){
@@ -265,7 +338,7 @@ function loop(ms){
     render(surface)
     draw(surface);
     
-
+    
     
  
     
